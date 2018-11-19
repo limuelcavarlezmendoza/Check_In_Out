@@ -13,4 +13,9 @@ class Employee extends Model
     protected $hidden = [
       'is_registered',
     ];
+
+    public function attendance()
+    {
+      return $this->hasOne('\App\Attendance');
+    }
 }

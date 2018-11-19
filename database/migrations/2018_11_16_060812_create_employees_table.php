@@ -20,6 +20,7 @@ class CreateEmployeesTable extends Migration
             $table->string('firebase_token')->nullable();
             $table->string('device_id');
             $table->integer('is_registered')->default(0);
+            $table->integer('timeinout_allowed')->default(0);
             $table->timestamps();
         });
     }

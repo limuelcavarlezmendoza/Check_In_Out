@@ -19,6 +19,35 @@ use Illuminate\Http\Request;
 //
 //
 // });
+//------------------------------------------------------------------------
+// employee/~
+Route::group([
+    'prefix' => 'employee'
+], function () {
+      Route::post('register', 'EmployeeController@employeeRegister');
+
+      Route::get('/logs/{id}','EmployeeController@employeeLogs');
+      Route::get('/leave/{id}','EmployeeController@employeeLeave');
+      Route::get('/late/{id}','EmployeeController@employeeLate');//same method with late/{id}/{date}
+      Route::get('/late/{id}/{date}','EmployeeController@employeeLate');//same method with late/{id}
+
+      Route::post('/timein', 'EmployeeController@employeeTimeIn');//done needs testing
+      Route::post('/timeout', 'EmployeeController@employeeTimeOut');//done needs testing
+      // /employee/file/~ route
+      Route::group([
+          'prefix' => 'file'
+      ], function () {
+          Route::post('ot', 'EmployeeController@fileOverTime');//testing
+          Route::post('ob', 'EmployeeController@fileOfficialBusiness');
+          Route::post('sc', 'EmployeeController@fileScheduleChange');
+          Route::post('leave', 'EmployeeController@fileLeave');
+          Route::post('timeinout', 'EmployeeController@fileTimeinout');// request manual timein or mobile
+          Route::post('leavecancellation/{requestId}', 'EmployeeController@FileLeaveCancellation');
+      }); // employee/file/~
+}); // employee/~
+//------------------------------------------------------------------------
+
+
 Route::group([
     'prefix' => 'admin'
 ], function () {
@@ -89,29 +118,3 @@ Route::group([
 });// employee?~ prefix
 });// admin/~ prefix
 //----------------------------------------------------------------
-
-
-Route::group([
-    'prefix' => 'employee'
-], function () {
-      Route::post('register', 'EmployeeController@employeeRegister');
-
-      Route::get('/logs/{id}','EmployeeController@employeeLogs');
-      Route::get('/leave/{id}','EmployeeController@employeeLeave');
-      Route::get('/late/{id}','EmployeeController@employeeLate');//same method with late/{id}/{date}
-      Route::get('/late/{id}/{date}','EmployeeController@employeeLate');//same method with late/{id}
-
-      Route::post('/timein', 'EmployeeController@employeeTimeIn');
-      Route::post('/timeout', 'EmployeeController@employeeTimeOut');
-      // /employee/file/~ route
-      Route::group([
-          'prefix' => 'file'
-      ], function () {
-          Route::post('ot', 'EmployeeController@fileOvertime');
-          Route::post('ob', 'EmployeeController@fileOfficialBusiness');
-          Route::post('sc', 'EmployeeController@fileScheduleChange');
-          Route::post('leave', 'EmployeeController@fileLeave');
-          Route::post('timeinout', 'EmployeeController@fileTimeinout');// request manual timein or mobile
-          Route::post('leavecancellation', 'EmployeeController@FileLeaveCancellation');
-      }); // employee/file/~
-}); // employee/~
