@@ -28,29 +28,29 @@ Route::group([
     Route::group([
         'prefix' => 'roles'
     ], function () {
-        Route::post('/create', 'AdminController@createRole');
-        Route::post('/assign/{$employee}', 'AdminController@assignRole');
-        Route::get('/lists', 'AdminController@listRole');
-        Route::post('/delete', 'AdminController@deleteRole');
+        Route::post('/create', 'AdminController@createRole');//done
+        Route::post('/assign/{$employee}', 'AdminController@assignRole');//not yet no users
+        Route::get('/lists', 'AdminController@listRole');//done
+        Route::post('/delete', 'AdminController@deleteRole');//done
     });
 
     // /admin/file
     Route::group([
         'prefix' => 'file'
     ], function () {
-        Route::get('/ot', 'AdminController@getFileOvertime');
-        Route::get('/ob', 'AdminController@getFileOfficialBusiness');
-        Route::get('/sc', 'AdminController@getFileScheduleChange');
-        Route::get('/leave', 'AdminController@getFileLeave');
+        Route::get('/ot', 'AdminController@getFileOvertime');//done
+        Route::get('/ob', 'AdminController@getFileOfficialBusiness');//done
+        Route::get('/sc', 'AdminController@getFileScheduleChange');//done
+        Route::get('/leave', 'AdminController@getFileLeave');//done
         Route::get('/timeinout', 'AdminController@getFileTimeinout');
         Route::get('/leavecancellation', 'AdminController@getFileLeaveCancellation');
 
-        Route::put('/ot', 'AdminController@updateFileOvertime');
-        Route::put('/ob', 'AdminController@updateFileOfficialBusiness');
-        Route::put('/sc', 'AdminController@updateFileScheduleChange');
-        Route::put('/leave', 'AdminController@updateFileLeave');
-        Route::put('/timeinout', 'AdminController@updateFileTimeinout');
-        Route::put('/leavecancellation', 'AdminController@updateFileLeaveCancellation');
+        Route::put('/ot/{overtime}', 'AdminController@updateFileOvertime');//done
+        Route::put('/ob/{officialBusiness}', 'AdminController@updateFileOfficialBusiness');//done
+        Route::put('/sc/{schedule}', 'AdminController@updateFileScheduleChange');//done
+        Route::put('/leave/{leave}', 'AdminController@updateFileLeave');//done
+        Route::put('/timeinout/{inout}', 'AdminController@updateFileTimeinout');
+        Route::put('/leavecancellation/{leaveCancel}', 'AdminController@updateFileLeaveCancellation');
     });
 
 //----------------------------------------------------------------
