@@ -16,37 +16,6 @@ use Illuminate\Http\Request;
 // Route::group([
 //   'middleware' => 'auth:api'
 // ], function() {
-//
-//
-// });
-//------------------------------------------------------------------------
-// employee/~
-Route::group([
-    'prefix' => 'employee'
-], function () {
-      Route::post('register', 'EmployeeController@employeeRegister');
-
-      Route::get('/logs/{id}','EmployeeController@employeeLogs');
-      Route::get('/leave/{id}','EmployeeController@employeeLeave');
-      Route::get('/late/{id}','EmployeeController@employeeLate');//same method with late/{id}/{date}
-      Route::get('/late/{id}/{date}','EmployeeController@employeeLate');//same method with late/{id}
-
-      Route::post('/timein', 'EmployeeController@employeeTimeIn');//done needs testing
-      Route::post('/timeout', 'EmployeeController@employeeTimeOut');//done needs testing
-      // /employee/file/~ route
-      Route::group([
-          'prefix' => 'file'
-      ], function () {
-          Route::post('ot', 'EmployeeController@fileOverTime');//testing
-          Route::post('ob', 'EmployeeController@fileOfficialBusiness');
-          Route::post('sc', 'EmployeeController@fileScheduleChange');
-          Route::post('leave', 'EmployeeController@fileLeave');
-          Route::post('timeinout', 'EmployeeController@fileTimeinout');// request manual timein or mobile
-          Route::post('leavecancellation/{requestId}', 'EmployeeController@FileLeaveCancellation');
-      }); // employee/file/~
-}); // employee/~
-//------------------------------------------------------------------------
-
 
 Route::group([
     'prefix' => 'admin'
@@ -55,6 +24,15 @@ Route::group([
     Route::post('/register', 'AdminController@adminRegister');
     Route::post('/approve/{id}', 'AdminController@approveEmployee');
     Route::post('/status/{id}', 'AdminController@changeStatus');// change inactive/active status
+
+    Route::group([
+        'prefix' => 'roles'
+    ], function () {
+        Route::post('/create', 'AdminController@createRole');
+        Route::post('/assign/{$employee}', 'AdminController@assignRole');
+        Route::get('/lists', 'AdminController@listRole');
+        Route::post('/delete', 'AdminController@deleteRole');
+    });
 
     // /admin/file
     Route::group([
@@ -118,3 +96,36 @@ Route::group([
 });// employee?~ prefix
 });// admin/~ prefix
 //----------------------------------------------------------------
+
+//
+//
+// });
+//------------------------------------------------------------------------
+// employee/~
+Route::group([
+    'prefix' => 'employee'
+], function () {
+      Route::post('register', 'EmployeeController@employeeRegister');
+
+      Route::get('/logs/{id}','EmployeeController@employeeLogs');
+      Route::get('/leave/{id}','EmployeeController@employeeLeave');
+      Route::get('/late/{id}','EmployeeController@employeeLate');//same method with late/{id}/{date}
+      Route::get('/late/{id}/{date}','EmployeeController@employeeLate');//same method with late/{id}
+
+      Route::get('/inout/{attendance_id}', 'EmployeeController@inout');
+
+      Route::post('/timein', 'EmployeeController@employeeTimeIn');//done needs testing
+      Route::post('/timeout', 'EmployeeController@employeeTimeOut');//done needs testing
+      // /employee/file/~ route
+      Route::group([
+          'prefix' => 'file'
+      ], function () {
+          Route::post('ot', 'EmployeeController@fileOverTime');//testing
+          Route::post('ob', 'EmployeeController@fileOfficialBusiness');
+          Route::post('sc', 'EmployeeController@fileScheduleChange');
+          Route::post('leave', 'EmployeeController@fileLeave');
+          Route::post('timeinout', 'EmployeeController@fileTimeinout');// request manual timein or mobile
+          Route::post('leavecancellation/{requestId}', 'EmployeeController@FileLeaveCancellation');
+      }); // employee/file/~
+}); // employee/~
+//------------------------------------------------------------------------

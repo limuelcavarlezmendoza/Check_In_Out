@@ -11,31 +11,56 @@ use App\Requestot;
 use App\Requestob;
 use App\Requestleave;
 use App\Requestschedule;
-use App\Attendance;
+use App\Timelog;
 use DB;
 
 class EmployeeController extends Controller
 {
+
+
+  /*
+  * normalFlex 7-9 if 9:10 up then late true
+  *crmFlex 7-11 if 11:10 up then late
+  *
+  *
+  *
+  *
+  *
+  *
+  *
+  */
+  public function employeeLate($id)
+  {
+    $employee = \App\Employee::where('id', $id)
+                              ->select('id', 'employee_number')->get();
+
+
+  }
+
   public function employeeLeave($id)
   {
     $employee = \App\Employee::where('id', $id)
-                  ->select('id', 'employee_number')->get();
+                              ->select('id', 'employee_number')->get();
 
-    $leaves = \App\Requestleave::where('id', $id)
-
+    $leavelogs = \App\Requestleave::where('employee_id', $id)
+                              ->select('reason', 'days_count',
+                              'date_requested', 'date_start',
+                              'date_end', 'status', 'approved_by', 'date_approved',
+                              'declined_by', 'date_declined')->get();
+    return response()->json([
+      'message' => 'list of all leaves',
+      'employee' => $employee,
+      'leaves' => $leavelogs
+    ]);
   }
 
   public function employeeLogs($id)
   {
-    //emp name id
-    //emp.attendance
+    //get id and number
     $employee = \App\Employee::where('id', $id)
                 ->select('id', 'employee_number')->get();
-
-    // $employee = DB::table('employees')->select('id', 'employee_number')
-    //                                   ->where('id', $id)->get();
-
-    $logs = \App\Attendance::where('employee_id', $id)
+    //get logs
+    $logs = \App\Timelog::where('employee_id', $id)
                           ->select('status', 'action',
                           'device_datetime', 'timezone',
                             'remarks', 'work_status')->get();
@@ -46,6 +71,21 @@ class EmployeeController extends Controller
       'logs' => $logs
     ]);
 
+  }
+
+  public function inout($attendance_id)
+  {
+    $timelog = DB::select("SELECT  id as 'id',
+	  (select action  from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = id) as 'In',
+    (select device_datetime from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = id) as 'Time In' ,
+    (select action from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = id) as 'Out',
+    (select device_datetime from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = id) as 'Time Out'
+    FROM attendances
+    Where id = $attendance_id");
+
+    return response()->json([
+      'message' => $timelog
+    ]);
   }
 
   public function FileLeaveCancellation(Request $request, $requestId)
@@ -235,18 +275,33 @@ class EmployeeController extends Controller
       'work_status' => 'required|string' // onfield or office
     ]);
 
-    $attendance = new \App\Attendance;
-    $attendance->employee_id = $request->employee_id;
-    $attendance->status = $request->status;
-    $attendance->action = $request->action;
-    $attendance->latitude = $request->latitude;
-    $attendance->longitude = $request->longitude;
-    $attendance->device_datetime = $request->device_datetime;
-    $attendance->server_datetime = date('Y-m-d H:i:s');
-    $attendance->timezone = $request->timezone;
-    $attendance->work_status = $request->work_status;
-    $attendance->save();
+      $attendance = new \App\Attendance([
+        'employee_id' => $request->employee_id
+      ]);
+      $attendance->save();
+
+      $timelog = new \App\Timelog;
+      $timelog->employee_id = $request->employee_id;
+      //attendance
+      $timelog->attendance_id = $attendance->id;
+      $timelog->status = $request->status;
+      $timelog->action = $request->action;
+      $timelog->latitude = $request->latitude;
+      $timelog->longitude = $request->longitude;
+      $timelog->device_datetime = $request->device_datetime;
+      $timelog->server_datetime = date('Y-m-d H:i:s');
+      $timelog->timezone = $request->timezone;
+      $timelog->work_status = $request->work_status;
+      $timelog->save();
     // STORE THE DATA
+
+   /* if request[action] == "in"
+   *  add new data on table attendance
+   *  after adding get the id of attendance
+   * --------------------
+   * use the attendance_id to insert new data on time_log table
+   */
+
 
     return response()->json([
       'message' => "Successfully Checked In.",
@@ -268,23 +323,31 @@ class EmployeeController extends Controller
       'work_status' => 'required|string' // onfield or office
     ]);
 
-    $attendance = new \App\Attendance;
-    $attendance->employee_id = $request->employee_id;
-    $attendance->status = $request->status;
-    $attendance->action = $request->action;
-    $attendance->latitude = $request->latitude;
-    $attendance->longitude = $request->longitude;
-    $attendance->device_datetime = $request->device_datetime;
-    $attendance->server_datetime = date('Y-m-d H:i:s');
-    $attendance->timezone = $request->timezone;
-    $attendance->work_status = $request->work_status;
-    $attendance->save();
+    $attendance = \App\Attendance::where('employee_id', $request->employee_id)
+                                  ->orderBy('id', 'desc')
+                                  ->first();
+
+  //  $attendance = \App\Attendance::findOrFail($request->employee_id);
+    $timelog = new \App\Timelog;
+    $timelog->employee_id = $request->employee_id;
+    //attendance
+    $timelog->attendance_id = $attendance->id;  //fix the error
+    $timelog->status = $request->status;
+    $timelog->action = $request->action;
+    $timelog->latitude = $request->latitude;
+    $timelog->longitude = $request->longitude;
+    $timelog->device_datetime = $request->device_datetime;
+    $timelog->server_datetime = date('Y-m-d H:i:s');
+    $timelog->timezone = $request->timezone;
+    $timelog->work_status = $request->work_status;
+    $timelog->save();
     // STORE THE DATA
 
     return response()->json([
       'message' => "Successfully Checked Out.",
       'checkinTime' => $request->device_datetime
     ]);
+
   }
 
 

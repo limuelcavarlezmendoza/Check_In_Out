@@ -15,16 +15,7 @@ class CreateAttendancesTable extends Migration
     {
         Schema::create('attendances', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('employee_id');
-            $table->string('status')->nullable();// attendance or manual
-            $table->string('action'); //check in or check out
-            $table->string('latitude');
-            $table->string('longitude');
-            $table->dateTime('device_datetime'); //Y-m-d h-m-s
-            $table->dateTime('server_datetime');
-            $table->string('timezone');
-            $table->string('remarks')->nullable();
-            $table->string('work_status');
+            $table->integer('employee_id');
             $table->timestamps();
         });
     }
