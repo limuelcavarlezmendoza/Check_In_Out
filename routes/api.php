@@ -55,45 +55,47 @@ Route::group([
 
 //----------------------------------------------------------------
     // /admin/employee/~
-    Route::get('/employees', 'AdminController@employeeList');
+
     Route::group([
         'prefix' => 'employee'
     ], function () {
+    Route::get('', 'AdminController@employeeList');
+    Route::get('/logs', 'AdminController@employeeLog');
     Route::get('/{id}', 'AdminController@getEmployee');
 //----------------------------------------------------------------
     // /admin/employee/logs/~
-    Route::get('/logs', 'AdminController@employeeLog');
-    Route::group([
-        'prefix' => 'logs'
-    ], function () {
-    Route::get('/{date}', 'AdminController@employeeLog');
 
-    Route::get('/onleave', 'AdminController@onLeaveLog');
-    Route::get('/onleave/{date}', 'AdminController@onLeaveLog');
+     Route::group([
+         'prefix' => 'logs'
+     ], function () {
+     Route::get('/onleave/{date}', 'AdminController@onLeaveLog');
+     Route::get('/onleave', 'AdminController@onLeaveLog');
 
-    Route::get('/office', 'AdminController@officeLog');
-    Route::get('/office/{date}', 'AdminController@officeLog');
+     Route::get('/office/{date}', 'AdminController@officeLog');
+     Route::get('/office', 'AdminController@officeLog');
 
-    Route::get('/onfield', 'AdminController@onfieldLog');
-    Route::get('/onfield/{date}', 'AdminController@onfieldLog');
+     Route::get('/onfield/{date}', 'AdminController@onfieldLog');
+     Route::get('/onfield', 'AdminController@onfieldLog');
 
-    Route::get('/absent', 'AdminController@absentLog');
-    Route::get('/absent/{date}', 'AdminController@absentLog');
-    Route::get('/absent/{employee_id}', 'AdminController@absentLog');
-    Route::get('/absent/{employee_id/{date}}', 'AdminController@absentLog');
+     Route::get('/absent/{date}', 'AdminController@absentLog');
+     Route::get('/absent', 'AdminController@absentLog');
+     Route::get('/absent/{employee_id/{date}}', 'AdminController@absentLog');
+     Route::get('/absent/{employee_id}', 'AdminController@absentLog');
 
-    Route::get('/late', 'AdminController@lateLog');
-    Route::get('/late/{date}', 'AdminController@lateLog');
-    Route::get('/late/{employee_id}', 'AdminController@lateLog');
-    Route::get('/late/{employee_id}/{date}', 'AdminController@lateLog');
+     Route::get('/late/{date}', 'AdminController@lateLog');
+     Route::get('/late', 'AdminController@lateLog');
+     Route::get('/late/{employee_id}', 'AdminController@lateLog');
+     Route::get('/late/{employee_id}/{date}', 'AdminController@lateLog');
 
-    Route::get('/leave', 'AdminController@leaveLog');
-    Route::get('/leave/{date}', 'AdminController@leaveLog');
-    Route::get('/leave/{employee_id}', 'AdminController@leaveLog');
-    Route::get('/leave/{employee_id}/{date}', 'AdminController@leaveLog');
+     Route::get('/leave/{date}', 'AdminController@leaveLog');
+     Route::get('/leave', 'AdminController@leaveLog');
+     Route::get('/leave/{employee_id}', 'AdminController@leaveLog');
+     Route::get('/leave/{employee_id}/{date}', 'AdminController@leaveLog');
 
-  });// /employee/logs/~ prefix
-});// employee?~ prefix
+     Route::get('/{date}', 'AdminController@employeeLogDate');
+     Route::get('/{date_from}/{date_to}', 'AdminController@employeeLogFromTo');
+   });// /employee/logs/~ prefix
+  });// employee?~ prefix
 });// admin/~ prefix
 //----------------------------------------------------------------
 

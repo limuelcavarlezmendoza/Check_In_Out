@@ -73,20 +73,7 @@ class EmployeeController extends Controller
 
   }
 
-  public function inout($attendance_id)
-  {
-    $timelog = DB::select("SELECT  id as 'id',
-	  (select action  from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = id) as 'In',
-    (select device_datetime from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = id) as 'Time In' ,
-    (select action from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = id) as 'Out',
-    (select device_datetime from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = id) as 'Time Out'
-    FROM attendances
-    Where id = $attendance_id");
 
-    return response()->json([
-      'message' => $timelog
-    ]);
-  }
 
   public function FileLeaveCancellation(Request $request, $requestId)
   {

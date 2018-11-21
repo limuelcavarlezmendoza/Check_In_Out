@@ -19,6 +19,79 @@ use DB;
 
 class AdminController extends Controller
 {
+   public function onLeaveLog($date)
+   {
+      $onLeave = \App\Requestleave::where('date_start', '>=', $date)->get();
+
+      return response()->json([
+        'message' => 'list of on leave in given date',
+        'onleaves' => $onLeave
+      ]);
+   }
+
+   public function employeeLogFromTo($date_from, $date_to)
+   {
+     $timelog = DB::select("SELECT  id as 'attendanceId',
+     (select action  from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'In',
+     (select device_datetime from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'Time In' ,
+     (select action from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Out',
+     (select device_datetime from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Time Out'
+     FROM attendances WHERE created_at BETWEEN '".date($date_from)."' AND '".date($date_to)."' "); // and timelogs.device_datetime >= $date
+
+     return response()->json([
+       'message' => $timelog
+     ]);
+   }
+
+   public function employeeLogDate($date)
+   { //where timelogs.device_datetime >= $date
+     $timelog = DB::select("SELECT  id as 'attendanceId',
+     (select action  from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'In',
+     (select device_datetime from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'Time In' ,
+     (select action from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Out',
+     (select device_datetime from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Time Out'
+     FROM attendances WHERE created_at like '%".date($date)."%'"); // and timelogs.device_datetime >= $date
+
+     return response()->json([
+       'message' => $timelog
+     ]);
+
+   }
+
+  public function employeeLog()
+  {
+      $timelog = DB::select("SELECT  id as 'attendanceId',
+  	  (select action  from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'In',
+      (select device_datetime from timelogs where timelogs.action = 'timein' and timelogs.attendance_id = attendanceId) as 'Time In' ,
+      (select action from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Out',
+      (select device_datetime from timelogs where timelogs.action = 'timeout' and timelogs.attendance_id = attendanceId) as 'Time Out'
+      FROM attendances");
+
+      return response()->json([
+        'message' => $timelog
+      ]);
+  }
+
+  public function getEmployee($id)
+  {
+    $employee = DB::table('employees')->select('id', 'employee_number', 'device_type')->where('id', $id)->get();
+
+    return response()->json([
+      'message' => 'Employee',
+      'employee' => $employee
+    ]);
+  }
+
+  public function employeeList()
+  {
+    $employee = DB::table('employees')->select('id', 'employee_number', 'device_type')->get();
+
+    return response()->json([
+      'message' => 'List of Employees',
+      'employees' => $employee
+    ]);
+  }
+
   public function updateFileLeave(Request $request, Requestleave $leave)
   {
     $request->validate([
@@ -26,9 +99,9 @@ class AdminController extends Controller
     ]);
     $leave->status = $request->status;
 
-
     switch($leave->status){
       case 'approved':
+            $leave->date_approved = Carbon::now('UTC');
             $leave->save();
             return response()->json([
               'message' => 'Successfully Approved!',
@@ -36,6 +109,7 @@ class AdminController extends Controller
             ]);
             break;
       case 'cancelled':
+            $leave->date_declined = Carbon::now();
             $leave->save();
             return response()->json([
               'message' => 'Successfully cancelled/denied!',
@@ -66,6 +140,7 @@ class AdminController extends Controller
 
     switch($schedule->status){
       case 'approved':
+            $schedule->date_approved = Carbon::now();
             $schedule->save();
             return response()->json([
               'message' => 'Successfully Approved!',
@@ -73,6 +148,7 @@ class AdminController extends Controller
             ]);
             break;
       case 'cancelled':
+            $schedule->date_declined = Carbon::now();
             $schedule->save();
             return response()->json([
               'message' => 'Successfully cancelled!',
@@ -103,6 +179,7 @@ class AdminController extends Controller
 
     switch($officialBusiness->status){
       case 'approved':
+            $officialBusiness->date_approved = Carbon::now();
             $officialBusiness->save();
             return response()->json([
               'message' => 'Successfully Approved!',
@@ -110,6 +187,7 @@ class AdminController extends Controller
             ]);
             break;
       case 'cancelled':
+            $officialBusiness->date_declined = Carbon::now();
             $officialBusiness->save();
             return response()->json([
               'message' => 'Successfully cancelled!',
@@ -140,6 +218,7 @@ class AdminController extends Controller
 
       switch($request->status){
         case 'approved':
+              $overtime->date_approved = Carbon::now();
               $overtime->save();
               return response()->json([
                 'message' => 'Successfully Approved Overtime',
@@ -147,6 +226,7 @@ class AdminController extends Controller
               ]);
               break;
         case 'cancelled':
+              $overtime->date_declined = Carbon::now();
               $overtime->save();
               return response()->json([
                 'message' => 'Successfully cancelled!',
