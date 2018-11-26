@@ -19,6 +19,10 @@ use DB;
 
 class AdminController extends Controller
 {
+   public function __construct()
+   {
+     $this->middleware(['role:admin']);
+   }
    public function onLeaveLog($date)
    {
       $onLeave = \App\Requestleave::where('date_start', '>=', $date)->get();
@@ -310,6 +314,16 @@ class AdminController extends Controller
       ]);
     }
 
+    public function assignRole(User $user)
+    {
+      $user->assignRole('admin');
+      $role = $user->getRoleNames();
+      return response()->json([
+        'message' => 'Successfully added as',
+        'role' => $role
+      ]);
+    }
+
     public function createRole(Request $request)
     {
       $request->validate([
@@ -326,18 +340,91 @@ class AdminController extends Controller
     public function approveEmployee($id)
     {
       $employee = \App\Employee::find($id);
+      $updateDetails = array(
+        'status' => 3
+      );
+
       if(!$employee)
       {
           return response()->json([
             'message' => 'Employee not found.'
           ]);
       }
-      $employee->status = 'approved';
-      $employee->save();
+
+      $sameAccount = DB::table('employees')
+                        ->where('employee_number', $employee->employee_number)
+                        ->get();
+
+      if(($employee->status == '2') || ($employee->status == '3'))
+      {
+          return response()->json([
+            'message' => 'employee is already declined or replaced'
+          ]);
+      }
+      else if($employee->status == '1')
+      {
+          return response()->json([
+            'message' => 'employee is still active'
+          ]);
+      }
+
+      if($sameAccount >= '2')
+        {
+            $sameAccount = DB::table('employees')
+                           ->where('employee_number', $employee->employee_number)
+                           ->where('status', '=', 1)
+                           ->update($updateDetails);
+        }
+        $user = $employee->user;
+        $user->assignRole('employee');
+        $role = $user->getRoleNames();
+
+       $employee->status = 1;
+       $employee->save();
+
+       return response()->json([
+         'message' => 'Employee approved',
+         'status' => $employee->status,
+         'role' => $role
+       ]);
+    }
+
+    public function inviteAdmin(Request $request)
+    {
+      $request->validate([
+        'employee_id' => 'required|integer|exists:employees,id',
+        'employee_number' => 'required|string|exists:employees,employee_number'
+      ]);
+      $employeeChecker = DB::table('users')
+                      ->where('employee_number', $request->employee_number)
+                      ->first();
+      if(isset($employeeChecker))
+      {
+        if($employeeChecker->status !== '1')
+        {
+          return response()->json([
+            'message' => 'Employee already invited, waiting to register.'
+          ]);
+        }
+      }
+
+      $employee = \App\Employee::find($request->employee_id);
+
+      if(!$employee)
+      {
+          return response()->json([
+          'message' => 'Employee not found.'
+        ]);
+      }
+
+      $user = new \App\User([
+        'employee_number' => $request->employee_number
+      ]);
+      $user->save();
 
       return response()->json([
-        'message' => 'Employee approved',
-        'status' => $employee->status
+        'message' => 'User Saved! Now user can register as admin.',
+        'user' => $user->employee_number
       ]);
     }
 

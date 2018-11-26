@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'employee_id', 'is_active', 'password',
+        'employee_number', 'password',
     ];
 
     /**
@@ -30,6 +30,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token', 'is_active',
+        'password', 'remember_token',
     ];
+
+    public function employee()
+    {
+      return $this->hasOne(\App\Employee::class);
+    }
 }

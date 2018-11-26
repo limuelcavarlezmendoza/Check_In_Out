@@ -13,26 +13,38 @@ use Illuminate\Http\Request;
 |
 */
 
-// Route::group([
-//   'middleware' => 'auth:api'
-// ], function() {
+Route::group([
+  'prefix' => 'auth'
+], function (){
+    // /admin/login
+    Route::post('/employee/login', 'AuthController@employeeLogin');
+    Route::post('register', 'AuthController@employeeRegister');
+});
 
 Route::group([
     'prefix' => 'admin'
 ], function () {
-    Route::post('/add/{id}', 'AdminController@addAdmin'); //add admin
-    Route::post('/register', 'AdminController@adminRegister');
-    Route::post('/approve/{id}', 'AdminController@approveEmployee');
-    Route::post('/status/{id}', 'AdminController@changeStatus');// change inactive/active status
 
-    Route::group([
-        'prefix' => 'roles'
-    ], function () {
-        Route::post('/create', 'AdminController@createRole');//done
-        Route::post('/assign/{$employee}', 'AdminController@assignRole');//not yet no users
-        Route::get('/lists', 'AdminController@listRole');//done
-        Route::post('/delete', 'AdminController@deleteRole');//done
-    });
+
+
+      Route::group([
+       'middleware' => ['auth:api', 'role:admin']
+      ], function(){
+      Route::post('/register/invite', 'AdminController@inviteAdmin');
+      Route::post('/add/{id}', 'AdminController@addAdmin'); //add admin
+      Route::put('/approve/{id}', 'AdminController@approveEmployee');
+      Route::post('/status/{id}', 'AdminController@changeStatus');// change inactive/active status
+
+      Route::group([
+          'prefix' => 'roles'
+      ], function () {
+
+          Route::post('/assign/{user}', 'AdminController@assignRole');//not yet no users
+          Route::post('/create', 'AdminController@createRole');//done
+          Route::get('/lists', 'AdminController@listRole');//done
+          Route::post('/delete', 'AdminController@deleteRole');//done
+      });
+
 
     // /admin/file
     Route::group([
@@ -59,6 +71,7 @@ Route::group([
     Route::group([
         'prefix' => 'employee'
     ], function () {
+
     Route::get('', 'AdminController@employeeList');
     Route::get('/logs', 'AdminController@employeeLog');
     Route::get('/{id}', 'AdminController@getEmployee');
@@ -96,6 +109,7 @@ Route::group([
      Route::get('/{date_from}/{date_to}', 'AdminController@employeeLogFromTo');
    });// /employee/logs/~ prefix
   });// employee?~ prefix
+});//middleware
 });// admin/~ prefix
 //----------------------------------------------------------------
 
@@ -109,6 +123,10 @@ Route::group([
 ], function () {
       Route::post('register', 'EmployeeController@employeeRegister');
 
+
+      Route::group([
+        'middleware' => ['auth:api', 'role:employee']
+       ], function(){
       Route::get('/logs/{id}','EmployeeController@employeeLogs');
       Route::get('/leave/{id}','EmployeeController@employeeLeave');
       Route::get('/late/{id}','EmployeeController@employeeLate');//same method with late/{id}/{date}
@@ -129,5 +147,6 @@ Route::group([
           Route::post('timeinout', 'EmployeeController@fileTimeinout');// request manual timein or mobile
           Route::post('leavecancellation/{requestId}', 'EmployeeController@FileLeaveCancellation');
       }); // employee/file/~
+    });
 }); // employee/~
 //------------------------------------------------------------------------

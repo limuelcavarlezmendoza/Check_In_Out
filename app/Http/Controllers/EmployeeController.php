@@ -16,7 +16,10 @@ use DB;
 
 class EmployeeController extends Controller
 {
-
+  public function __construct()
+  {
+    $this->middleware(['role:employee']);
+  }
 
   /*
   * normalFlex 7-9 if 9:10 up then late true
@@ -227,25 +230,37 @@ class EmployeeController extends Controller
   public function employeeRegister(Request $request)
   {
     $request->validate([
-       'employee_number' => 'required|string|unique:Employees,employee_number',
+       'employee_number' => 'required|string',
        'device_id' => 'required|string',
        'device_type' => 'required|string',
     ]);
+
+    $employee = DB::table('employees')
+                      ->where('employee_number', '=', $request->employee_number)
+                      ->get();
+
+    $checkStatus = DB::table('employees')
+                        ->where('employee_number', '=', $request->employee_number)
+                        ->whereIn('status', [0])
+                        ->get();
+    // dd($checkStatus);
+    if(count($checkStatus) >= '1')
+      {
+        return response()->json([
+          'message' => 'Employee number is already waiting for approval'
+        ]);
+      }
 
     $employee = new \App\Employee([
       'employee_number' => $request->employee_number,
       'device_type' => $request->device_type,
       'device_id' => $request->device_id,
-      'status' => 'waiting'
     ]);
     $employee->save();
     return response()->json([
       'message' => 'User Successfully Created!'
     ]);
   }
-
-
-// STILL NEEDS TO STORE THE dATA TO THE DATABASE!!!
 
   public function employeeTimeIn(Request $request)
   {
@@ -288,7 +303,6 @@ class EmployeeController extends Controller
    * --------------------
    * use the attendance_id to insert new data on time_log table
    */
-
 
     return response()->json([
       'message' => "Successfully Checked In.",

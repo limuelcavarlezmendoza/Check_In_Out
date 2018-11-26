@@ -16,7 +16,12 @@ class CreateEmployeesTable extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->increments('id');
             $table->string('employee_number');
+
+            $table->integer('user_id')->unsigned()->index()->nullable();
+            $table->foreign('user_id')->references('id')->on('users');
+
             $table->string('device_type');
+            $table->integer('status')->default(0);
             $table->string('firebase_token')->nullable();
             $table->string('device_id');
             $table->integer('is_registered')->default(0);

@@ -14,5 +14,8 @@ class Employee extends Model
       'is_registered',
     ];
 
-  
+  public function user()
+  {
+    return $this->belongsTo(\App\User::class);
+  }
 }
